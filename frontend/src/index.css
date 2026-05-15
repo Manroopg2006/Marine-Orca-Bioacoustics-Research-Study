@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet CSS — required for map rendering */
+@import 'leaflet/dist/leaflet.css';
+
+body {
+  @apply bg-ocean-900 text-slate-100;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar for the detection feed */
+.scrollbar-ocean {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #1e293b;
+}
+.scrollbar-ocean::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-ocean::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+.scrollbar-ocean::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 3px;
+}
+
+/* Leaflet popup dark theme */
+.leaflet-popup-content-wrapper {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
+}
+.leaflet-popup-tip {
+  background: #1e293b !important;
+}
+.leaflet-container {
+  background: #0f172a !important;
+}

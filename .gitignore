@@ -1,0 +1,52 @@
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+
+# ── Data — never commit raw audio, model, or outputs ────
+data/raw_audio/
+data/processed/*.npy
+data/processed/*.csv
+data/processed/*.html
+data/processed/*.png
+
+# Keep the processed folder itself tracked (but empty)
+!data/processed/.gitkeep
+
+# ── ML model weights ─────────────────────────────────────
+src/models/*.pkl
+src/models/*.joblib
+src/models/*.h5
+src/models/*.pt
+src/models/*.onnx
+
+# ── Node / Frontend ──────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── OS / IDE ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Jupyter ──────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Credentials / secrets ────────────────────────────────
+.env
+.env.*
+secrets.json
