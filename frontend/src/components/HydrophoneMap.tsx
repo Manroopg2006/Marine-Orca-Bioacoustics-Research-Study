@@ -137,13 +137,13 @@ function HydrophoneMap({ selected }: Props) {
       </div>
 
       {/* Explicit pixel height — Leaflet must know its size at mount time */}
-      <div className="flex-1 min-h-0" style={{ height: '460px' }}>
-        <MapContainer
-          center={[48.0, -122.9]}
-          zoom={8}
-          style={{ height: '460px', width: '100%' }}
-          zoomControl
-          preferCanvas
+        <div className="flex-1 min-h-0">
+          <MapContainer
+            center={[48.0, -122.9]}
+            zoom={8}
+            style={{ height: '100%', width: '100%' }}
+            zoomControl
+            preferCanvas
         >
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"

@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { X, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react'
-import { fetchSpectrograms } from '../api/client'
+import { useState, useEffect } from 'react'
+import { X, ImageIcon } from 'lucide-react'
+import { generateSpectrogram } from '../api/client'
 import type { Detection } from '../types'
 
 interface Props {
@@ -9,17 +8,46 @@ interface Props {
   onClose: () => void
 }
 
-export default function SpectrogramViewer({ detection, onClose }: Props) {
-  const [imgIdx, setImgIdx] = useState(0)
+// Map filenames to their full paths
+function resolveFilePath(detection: Detection): string {
+  const file = detection.file
+  if (file.startsWith('KWSR')) {
+    return `C:/Users/xxman/data/raw_audio/onc_digby/${file}`
+  }
+  if (file.startsWith('OS_9_27')) {
+    return `C:/projects/orcapath-ai/data/raw_audio/labeled/orca/${file}`
+  }
+  return `C:/projects/orcapath-ai/data/raw_audio/labeled/orca/${file}`
+}
 
-  const { data: spectrograms, isLoading } = useQuery({
-    queryKey: ['spectrograms'],
-    queryFn: fetchSpectrograms,
-    staleTime: 300_000,
-  })
+export default function SpectrogramViewer({ detection, onClose }: Props) {
+  const [spectrogramUrl, setSpectrogramUrl] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const pct = Math.round(detection.confidence * 100)
   const confColor = pct >= 90 ? 'text-emerald-400' : pct >= 70 ? 'text-amber-400' : 'text-red-400'
+
+useEffect(() => {
+    setIsLoading(true)
+    setSpectrogramUrl(null)
+    setError(false)
+
+    const filePath = resolveFilePath(detection)
+
+    generateSpectrogram(filePath, detection.start_sec, detection.end_sec)
+      .then(url => {
+        console.log('Spectrogram URL:', url)
+        setSpectrogramUrl(url)
+        setIsLoading(false)
+      })
+      .catch((err) => {
+        console.error('Spectrogram error:', err)
+        setError(true)
+        setIsLoading(false)
+      })
+  }, [detection]) 
+  
 
   return (
     <div className="bg-ocean-800 border border-ocean-700 rounded-xl p-4 animate-in slide-in-from-bottom-2">
@@ -43,7 +71,7 @@ export default function SpectrogramViewer({ detection, onClose }: Props) {
 
       <div className="flex gap-4">
         {/* Detection detail card */}
-        <div className="w-48 shrink-0 space-y-2 text-xs">
+        <div className="w-48 shrink-0 text-xs">
           <div className="bg-ocean-900 rounded-lg p-3 space-y-2 border border-ocean-700">
             <p className="font-semibold text-slate-300 uppercase tracking-wide text-xs">Detection</p>
             <div>
@@ -79,68 +107,34 @@ export default function SpectrogramViewer({ detection, onClose }: Props) {
           </div>
         </div>
 
-        {/* Spectrogram image carousel */}
+        {/* Spectrogram */}
         <div className="flex-1">
           {isLoading && (
-            <div className="h-40 bg-ocean-900 rounded-lg animate-pulse flex items-center justify-center text-slate-600">
+            <div className="h-44 bg-ocean-900 rounded-lg animate-pulse flex items-center justify-center text-slate-600">
               <ImageIcon size={24} />
             </div>
           )}
 
-          {spectrograms && spectrograms.length > 0 && (
-            <>
-              <div className="relative bg-ocean-900 rounded-lg overflow-hidden">
-                <img
-                  src={spectrograms[imgIdx].url}
-                  alt={spectrograms[imgIdx].title}
-                  className="w-full h-44 object-cover object-top"
-                  onError={(e) => {
-                    ;(e.target as HTMLImageElement).style.display = 'none'
-                  }}
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-ocean-900/90 px-3 py-2">
-                  <p className="text-xs text-slate-300 font-medium">{spectrograms[imgIdx].title}</p>
-                </div>
+          {spectrogramUrl && !isLoading && (
+            <div className="relative bg-ocean-900 rounded-lg overflow-hidden">
+              <img
+                src={spectrogramUrl}
+                alt="Detection spectrogram"
+                className="w-full h-44 object-cover object-top"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-ocean-900/90 px-3 py-2">
+                <p className="text-xs text-slate-300 font-medium">
+                  Mel Spectrogram · {detection.start_sec.toFixed(1)}s–{detection.end_sec.toFixed(1)}s
+                </p>
               </div>
-
-              {/* Navigation */}
-              {spectrograms.length > 1 && (
-                <div className="flex items-center justify-between mt-2">
-                  <button
-                    onClick={() => setImgIdx((i) => Math.max(0, i - 1))}
-                    disabled={imgIdx === 0}
-                    className="p-1 rounded-lg bg-ocean-700 hover:bg-ocean-600 disabled:opacity-30 text-slate-300 transition-colors"
-                  >
-                    <ChevronLeft size={14} />
-                  </button>
-                  <div className="flex gap-1.5">
-                    {spectrograms.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setImgIdx(i)}
-                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                          i === imgIdx ? 'bg-cyan-400' : 'bg-ocean-600 hover:bg-ocean-500'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setImgIdx((i) => Math.min(spectrograms.length - 1, i + 1))}
-                    disabled={imgIdx === spectrograms.length - 1}
-                    className="p-1 rounded-lg bg-ocean-700 hover:bg-ocean-600 disabled:opacity-30 text-slate-300 transition-colors"
-                  >
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
-              )}
-            </>
+            </div>
           )}
 
-          {spectrograms?.length === 0 && !isLoading && (
-            <div className="h-40 bg-ocean-900 rounded-lg flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
+          {error && !isLoading && (
+            <div className="h-44 bg-ocean-900 rounded-lg flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
               <ImageIcon size={24} className="text-slate-600" />
-              <p>No spectrograms available</p>
-              <p className="text-slate-600">Run the ML pipeline to generate spectrograms</p>
+              <p>Could not generate spectrogram</p>
+              <p className="text-slate-600">{detection.file}</p>
             </div>
           )}
         </div>
@@ -148,3 +142,5 @@ export default function SpectrogramViewer({ detection, onClose }: Props) {
     </div>
   )
 }
+
+

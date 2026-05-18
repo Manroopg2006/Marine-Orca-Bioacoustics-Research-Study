@@ -32,3 +32,27 @@ export async function fetchHealth(): Promise<{ status: string }> {
   const { data } = await api.get('/health')
   return data
 }
+
+
+
+
+export async function generateSpectrogram(
+  filePath: string,
+  startSec: number,
+  endSec: number
+): Promise<string> {
+  const params = new URLSearchParams({
+    file_path: filePath,
+    start_sec: startSec.toString(),
+    end_sec: endSec.toString(),
+  })
+  const response = await api.get(`/spectrograms/generate?${params}`, {
+    responseType: 'blob',
+  })
+  return URL.createObjectURL(response.data)
+}
+
+export async function fetchInsights(): Promise<{ summary: string; stats: any }> {
+  const { data } = await api.get('/insights')
+  return data
+}
