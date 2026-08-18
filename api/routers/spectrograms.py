@@ -6,6 +6,12 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse, StreamingResponse
 from typing import List
 from ..schemas import SpectrogramInfo
+import librosa
+import librosa.display
+import matplotlib
+import matplotlib.pyplot as plt
+
+
 
 router = APIRouter()
 
@@ -59,11 +65,7 @@ def generate_spectrogram(
 ):
     """Generate a spectrogram PNG for a specific audio segment."""
     try:
-        import librosa
-        import librosa.display
-        import matplotlib
         matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
     except ImportError:
         raise HTTPException(status_code=500, detail="librosa/matplotlib not installed")
 

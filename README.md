@@ -1,20 +1,31 @@
 # OrcaPath AI
 
-Passive acoustic monitoring system for detecting and analyzing orca (killer whale) vocalizations in underwater hydrophone recordings. Processes raw WAV files into timestamped detections, clusters call types, analyzes behavioral patterns, and serves everything through a React dashboard.
+Upload-first web app for detecting possible orca (killer whale) vocalizations in underwater WAV recordings. It classifies audio into small segments and returns a simple Orca / No Orca result, confidence score, and detected timestamps.
+
+## Current app
+
+The public-facing app is intentionally simple:
+
+1. A video-backed **Orca Detector** landing page scrolls to the upload form.
+2. A user uploads one WAV file (maximum 50 MB).
+3. FastAPI runs the trained classifier over 1-second segments.
+4. The result shows the highest confidence, audio duration, sample rate, number of analyzed segments, and any possible-call timestamps.
+
+### Add the landing video
+
+Download a licensed MP4 from [Pexels' orca video collection](https://www.pexels.com/search/videos/orca/) and save it as `frontend/public/media/orca-hero.mp4`. Record its creator and exact URL in `frontend/public/media/README.md`. The interface has a visual fallback if no video is present.
 
 ---
 
 ## How it works
 
 ```
-WAV recordings → mel spectrogram features → RandomForest classifier → detections.csv
-                                                                            ↓
-                                                               FastAPI backend (port 8000)
-                                                                            ↓
-                                                               React dashboard (port 5173)
+WAV upload → FastAPI validation → 1-second audio windows
+    → log-Mel features → Random Forest classifier → PostgreSQL results
+    → React audio player and interactive confidence timeline
 ```
 
-Each recording is sliced into 5-second chunks and converted to a 128-bin mel spectrogram (up to 20 kHz). The trained model outputs a binary prediction (orca / no-orca) and a confidence score for every chunk.
+Each recording is resampled to 44.1 kHz and split into one-second windows. Each window becomes 128-bin log-Mel spectrogram summary features (up to 20 kHz). The trained Random Forest returns an orca-call probability for every second; the chosen threshold determines whether that second is shown as a possible call.
 
 ---
 
@@ -205,3 +216,18 @@ src/models/*.pkl         # Trained model weights
 frontend/node_modules/
 frontend/dist/
 ```
+# Orca Detector
+
+## Persistent analysis history
+
+Every upload now creates an analysis record with the file name, time, model version, threshold, and detected timestamps. You can label a detected segment as **Confirmed orca**, **False positive**, or **Unsure**. Those labels are stored as review data; they do not change the model automatically.
+
+For the simplest local run, the API creates `data/orcapath.db` with SQLite. To run the app and PostgreSQL together with Docker, use:
+
+```powershell
+docker compose up --build
+```
+
+Then open `http://localhost:8080`. Stop it with `docker compose down`; the named PostgreSQL volume preserves your analysis history.
+
+The current model's documented evaluation and limitations are in [MODEL_CARD.md](MODEL_CARD.md). Its machine-readable facts are available at `/api/analyses/model/metadata`.

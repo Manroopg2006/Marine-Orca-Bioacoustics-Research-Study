@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict
+from datetime import datetime
+from typing import Any, Optional, List, Dict
 
 
 class Detection(BaseModel):
@@ -48,7 +49,52 @@ class DetectRequest(BaseModel):
 
 
 class DetectResponse(BaseModel):
+    analysis_id: int
     file: str
-    location: str
+    classification: str
+    confidence: float
+    duration_seconds: float
+    sample_rate: int
+    segments_analyzed: int
     total_detections: int
+    threshold: float
+    model_version: str
     detections: List[Dict]
+    segment_scores: List[Dict]
+
+
+class FeedbackRequest(BaseModel):
+    feedback: str
+
+
+class AnalysisSummary(BaseModel):
+    id: int
+    file: str
+    created_at: datetime
+    classification: str
+    confidence: float
+    duration_seconds: float
+    sample_rate: int
+    segments_analyzed: int
+    total_detections: int
+    threshold: float
+    model_version: str
+
+
+class AnalysisDetail(AnalysisSummary):
+    detections: List[Dict]
+
+
+class ModelMetadata(BaseModel):
+    model_version: str
+    training_date: str
+    dataset_version: str
+    available_recordings_used: int
+    missing_labeled_recordings: int
+    feature_type: str
+    classifier: str
+    segment_duration_seconds: int
+    threshold: float
+    threshold_selection: str
+    test_metrics: Dict[str, Any]
+    known_limitations: List[str]

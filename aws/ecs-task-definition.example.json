@@ -1,0 +1,27 @@
+{
+  "family": "orcapath",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/orcapathTaskRole",
+  "containerDefinitions": [{
+    "name": "orcapath",
+    "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/orcapath:1.0.0",
+    "essential": true,
+    "portMappings": [{ "containerPort": 8080, "protocol": "tcp" }],
+    "secrets": [{
+      "name": "DATABASE_URL",
+      "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:orcapath/prod/database-url"
+    }],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/orcapath",
+        "awslogs-region": "REGION",
+        "awslogs-stream-prefix": "app"
+      }
+    }
+  }]
+}

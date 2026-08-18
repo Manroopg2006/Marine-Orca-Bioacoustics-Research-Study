@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: orcapath-api
+    runtime: python
+    buildCommand: pip install -r requirements_api.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: ORCA_MODEL_PATH
+        value: /opt/render/project/src/src/models/orca_detector.pkl
+      - key: CORS_ORIGINS
+        sync: false

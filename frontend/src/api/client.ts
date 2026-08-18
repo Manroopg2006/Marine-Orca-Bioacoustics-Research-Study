@@ -1,7 +1,34 @@
 import axios from 'axios'
-import type { Detection, DetectionStats, Hydrophone, SpectrogramInfo } from '../types'
+import type { AnalysisSummary, AudioClassification, Detection, DetectionStats, FeedbackChoice, Hydrophone, SpectrogramInfo } from '../types'
 
-const api = axios.create({ baseURL: '/api' })
+const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api' })
+
+export async function uploadAudio(
+  file: File,
+  threshold: number
+): Promise<AudioClassification> {  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('threshold', threshold.toString())
+  try {
+    const { data } = await api.post<AudioClassification>('/audio/detect', formData)
+    return data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.detail ?? 'Unable to analyze this file.')
+    }
+    throw error
+  }
+}
+
+export async function fetchAnalyses(): Promise<AnalysisSummary[]> {
+  const { data } = await api.get<AnalysisSummary[]>('/analyses')
+  return data
+}
+
+export async function saveDetectionFeedback(detectionId: number, feedback: FeedbackChoice) {
+  const { data } = await api.post(`/analyses/detections/${detectionId}/feedback`, { feedback })
+  return data
+}
 
 export async function fetchDetections(params?: {
   location?: string
