@@ -1,3 +1,7 @@
+'file: api/client.ts'
+'objective: sends http requets to the backend (fastapi)'
+
+
 import axios from 'axios'
 import type { AnalysisSummary, AudioClassification, Detection, DetectionStats, FeedbackChoice, Hydrophone, SpectrogramInfo } from '../types'
 
@@ -55,6 +59,7 @@ export async function fetchSpectrograms(): Promise<SpectrogramInfo[]> {
   return data
 }
 
+'sends network request to make sure the server for backend is working'
 export async function fetchHealth(): Promise<{ status: string }> {
   const { data } = await api.get('/health')
   return data
@@ -62,7 +67,7 @@ export async function fetchHealth(): Promise<{ status: string }> {
 
 
 
-
+'generates spectrograms for ML analysis'
 export async function generateSpectrogram(
   filePath: string,
   startSec: number,

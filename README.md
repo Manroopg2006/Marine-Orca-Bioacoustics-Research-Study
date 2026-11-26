@@ -231,3 +231,14 @@ docker compose up --build
 Then open `http://localhost:8080`. Stop it with `docker compose down`; the named PostgreSQL volume preserves your analysis history.
 
 The current model's documented evaluation and limitations are in [MODEL_CARD.md](MODEL_CARD.md). Its machine-readable facts are available at `/api/analyses/model/metadata`.
+
+## Deploy the web app on Render
+
+The repository includes a Render Blueprint at `render.yaml`. It builds the existing Dockerfile, which compiles the React site and serves it from the FastAPI app on one web service.
+
+1. Make sure `src/models/orca_detector.pkl` is present. It is the trained Random Forest model required for audio uploads. The repository's `.gitignore` now allows this specific model file to be committed; other generated model files remain ignored.
+2. Commit and push the deployment files and model to the Git repository you want Render to use.
+3. In Render, choose **New > Blueprint**, connect that repository, and apply the `render.yaml` configuration. Render will build and deploy the web service.
+4. When deployment finishes, open the service's `onrender.com` URL. Check `/api/health` for `{"status":"ok"}`, then use the upload page to try a WAV file.
+
+This starter setup uses the app's default SQLite database. On a host without persistent storage, saved analysis records can disappear when the service is restarted or redeployed. Public analysis history stays disabled by default. If you want records and feedback to persist, configure a persistent disk or a hosted PostgreSQL database before relying on them.

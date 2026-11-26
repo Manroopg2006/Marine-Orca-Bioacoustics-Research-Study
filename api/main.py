@@ -1,3 +1,8 @@
+'file: main.py'
+'objective main backend file. receiving requets from axios Contains fastapi and the routing'
+
+
+
 import os
 from pathlib import Path
 from fastapi import FastAPI
@@ -53,6 +58,7 @@ def api_root():
     }
 
 
+'receives the health request'
 @app.get("/api/health")
 def health():
     return {"status": "ok"}

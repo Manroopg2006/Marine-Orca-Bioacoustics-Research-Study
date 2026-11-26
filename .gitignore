@@ -31,6 +31,7 @@ src/models/*.joblib
 src/models/*.h5
 src/models/*.pt
 src/models/*.onnx
+!src/models/orca_detector.pkl
 
 # ── Node / Frontend ──────────────────────────────────────
 frontend/node_modules/

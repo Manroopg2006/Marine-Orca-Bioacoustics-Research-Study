@@ -1,0 +1,4 @@
+# Install this only for local or deployed CNN inference/training.
+-r requirements_api.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.13.0+cpu; python_version < '3.12'

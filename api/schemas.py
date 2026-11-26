@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Any, Optional, List, Dict
 
+'database schemas'
 
 class Detection(BaseModel):
     id: int
